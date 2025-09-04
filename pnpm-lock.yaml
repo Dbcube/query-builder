@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@dbcube/core':
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: ^1.0.5
+        version: 1.0.5
     devDependencies:
       '@types/node':
         specifier: ^24.3.0
@@ -27,8 +27,8 @@ importers:
 
 packages:
 
-  '@dbcube/core@1.0.2':
-    resolution: {integrity: sha512-+xhqfUtoSrVDmidEwiPS/e7kf5SkRVjWsl2YeKwbX5xp0SbRQ8b37cqEfc5DNMpvtVlxwKUbYxNSfMk7EipHoQ==}
+  '@dbcube/core@1.0.5':
+    resolution: {integrity: sha512-w2svIUtvh4FGpiXT9SUjv53qOyf5sT5zsS4X6IXQsakyIwhXZGGP+g96jOcRb09NQl4kfd++5FbId7KPzfBK3w==}
 
   '@esbuild/aix-ppc64@0.25.9':
     resolution: {integrity: sha512-OaGtL73Jck6pBKjNIe24BnFE6agGl+6KxDtTfHhy1HmhthfKouEcOhqpSL64K4/0WCtbKFLOdzD/44cJ4k9opA==}
@@ -583,8 +583,8 @@ packages:
   napi-build-utils@2.0.0:
     resolution: {integrity: sha512-GEbrYkbfF7MoNaoh2iGG84Mnf/WZfB0GdGEsM8wz7Expx/LlWf5U8t9nvJKXSp3qr5IsEbK04cBGhol/KwOsWA==}
 
-  node-abi@3.75.0:
-    resolution: {integrity: sha512-OhYaY5sDsIka7H7AtijtI9jwGYLyl29eQn/W623DiN/MIv5sUqc4g7BIDThX+gb7di9f6xK02nkp8sdfFWZLTg==}
+  node-abi@3.76.0:
+    resolution: {integrity: sha512-vxPAUdXYJ2Vv8bUWSpbC/A4ltEdMYO4ruzMXrb99BbZz0IMmrt6xLhYirTIhOMk2dpsbjby+PZEhUkHIeMXM4g==}
     engines: {node: '>=10'}
 
   node-int64@0.4.0:
@@ -714,6 +714,7 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
+    deprecated: The work that was done in this beta branch won't be included in future versions
 
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
@@ -844,7 +845,7 @@ packages:
 
 snapshots:
 
-  '@dbcube/core@1.0.2':
+  '@dbcube/core@1.0.5':
     dependencies:
       better-sqlite3: 12.2.0
       follow-redirects: 1.15.11
@@ -1271,7 +1272,7 @@ snapshots:
 
   napi-build-utils@2.0.0: {}
 
-  node-abi@3.75.0:
+  node-abi@3.76.0:
     dependencies:
       semver: 7.7.2
 
@@ -1318,7 +1319,7 @@ snapshots:
       minimist: 1.2.8
       mkdirp-classic: 0.5.3
       napi-build-utils: 2.0.0
-      node-abi: 3.75.0
+      node-abi: 3.76.0
       pump: 3.0.3
       rc: 1.2.8
       simple-get: 4.0.1
