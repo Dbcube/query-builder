@@ -14,33 +14,33 @@ export class Database {
     private triggers: any[];
 
     constructor(name: string) {
-        this.name = name; 
+        this.name = name;
         const engine = new Engine(name);
         this.engine = engine;
         this.computedFields = [];
         this.triggers = [];
     }
 
-    async useComputes():Promise<void> {
+    async useComputes(): Promise<void> {
         this.computedFields = await ComputedFieldProcessor.getComputedFields(this.name);
     }
 
-    async useTriggers():Promise<void> {
+    async useTriggers(): Promise<void> {
         this.triggers = await TriggerProcessor.getTriggers(this.name);
     }
 
     async connect(): Promise<void> {
-        const response =  await this.engine.run('query_engine',[
+        const response = await this.engine.run('query_engine', [
             '--action', 'connect',
         ]);
-        if(response.status!=200){
+        if (response.status != 200) {
             returnFormattedError(response.status, response.message);
         }
         return response.data;
     }
 
     async disconnect(): Promise<void> {
-        return this.engine.run('query_engine',[
+        return this.engine.run('query_engine', [
             '--action', 'disconnect',
         ]);
     }
@@ -143,15 +143,18 @@ export class Table {
      * Adds a WHERE condition to the query.
      *
      * @param {string} column - The column to filter by.
-     * @param {string} operator - The comparison operator (e.g., '=', '>', '<').
-     * @param {any} value - The value to compare against.
+     * @param {string} operator - The comparison operator (e.g., '=', '>', '<', 'IS NULL', 'IS NOT NULL').
+     * @param {any} value - The value to compare against (optional for IS NULL/IS NOT NULL).
      * @returns {Table} - Returns the current instance of Table for method chaining.
      *
      * @example
      * const users = await db.table('users').where('age', '>', 25).get();
+     * const nullUsers = await db.table('users').where('email', 'IS NULL').get();
      * console.log(users); // [{ id: 1, name: 'John', age: 30 }]
      */
-    where(column: string, operator: string = '=', value?: any): Table {
+    where(column: string, operator: 'IS NULL' | 'IS NOT NULL'): Table;
+    where(column: string, operator: '=' | '!=' | '<>' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'NOT LIKE' | 'IN' | 'NOT IN' | 'BETWEEN' | 'NOT BETWEEN', value: any): Table;
+    where(column: string, operator: string, value?: any): Table {
         this.dml.where.push({
             column,
             operator,
@@ -167,15 +170,18 @@ export class Table {
      * Adds an OR WHERE condition to the query.
      *
      * @param {string} column - The column to filter by.
-     * @param {string} operator - The comparison operator (e.g., '=', '>', '<').
-     * @param {any} value - The value to compare against.
+     * @param {string} operator - The comparison operator (e.g., '=', '>', '<', 'IS NULL', 'IS NOT NULL').
+     * @param {any} value - The value to compare against (optional for IS NULL/IS NOT NULL).
      * @returns {Table} - Returns the current instance of Table for method chaining.
      *
      * @example
      * const users = await db.table('users').where('age', '>', 25).orWhere('name', '=', 'Jane').get();
+     * const nullUsers = await db.table('users').where('active', '=', true).orWhere('email', 'IS NULL').get();
      * console.log(users); // [{ id: 1, name: 'John', age: 30 }, { id: 2, name: 'Jane', age: 25 }]
      */
-    orWhere(column: string, operator: string = '=', value?: any): Table {
+    orWhere(column: string, operator: 'IS NULL' | 'IS NOT NULL'): Table;
+    orWhere(column: string, operator: '=' | '!=' | '<>' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'NOT LIKE' | 'IN' | 'NOT IN' | 'BETWEEN' | 'NOT BETWEEN', value: any): Table;
+    orWhere(column: string, operator: string, value?: any): Table {
         this.dml.where.push({
             column,
             operator,
@@ -201,7 +207,7 @@ export class Table {
     whereGroup(callback: WhereCallback): Table {
         const groupQuery = new Table(this.dml.database, this.dml.table, this.engine);
         callback(groupQuery);
-        
+
         this.dml.where.push({
             type: this.nextType,
             isGroup: true,
@@ -581,7 +587,7 @@ export class Table {
         }
         return this;
     }
-    
+
     /**
     * Executes the query and returns all matching rows.
     *
@@ -668,8 +674,8 @@ export class Table {
 
         this.dml.type = 'insert';
         this.dml.data = data;
-        
-        await this.getResponse(this.dml,'Add');
+
+        await this.getResponse(this.dml, 'Add');
 
         return data;
     }
@@ -697,8 +703,8 @@ export class Table {
 
         this.dml.type = 'update';
         this.dml.data = data;
-        
-        await this.getResponse(this.dml,'Update');
+
+        await this.getResponse(this.dml, 'Update');
 
         return data;
     }
@@ -738,94 +744,94 @@ export class Table {
         return deleteData;
     }
 
-    private async getResponse(dml:any = null, type:any=null): Promise<any> {
+    private async getResponse(dml: any = null, type: any = null): Promise<any> {
         const localDML = dml ? dml : this.dml;
         const computedFieldsNeeded: any[] = [];
         let dependeciesArrray: any[] = [];
 
-        if(this.computedFields.length>0){
+        if (this.computedFields.length > 0) {
             let columns = localDML.columns;
-            
+
             for (const field of localDML.columns) {
                 const computedField = this.computedFields.find(cf => cf.column === field);
-                
+
                 if (computedField) {
                     computedFieldsNeeded.push(computedField);
                     // Add dependencies to real fields
                     const dependencies = ComputedFieldProcessor.extractDependencies(computedField.instruction);
                     dependeciesArrray = [...dependeciesArrray, ...dependencies];
                     columns = Array.from(new Set([...columns, ...dependencies]));
-                    columns = columns.filter((col:string) => col != field);
+                    columns = columns.filter((col: string) => col != field);
                 }
             }
             localDML.columns = columns;
         }
 
         let arrayResult = [];
-        if(type){
-            const beffore = this.trigger.get('before'+type);
-            const after = this.trigger.get('after'+type);
-            if(this.triggers.length>0 && (beffore || after)){
+        if (type) {
+            const beffore = this.trigger.get('before' + type);
+            const after = this.trigger.get('after' + type);
+            if (this.triggers.length > 0 && (beffore || after)) {
                 const dataset = localDML.data;
                 for (let index = 0; index < dataset.length; index++) {
                     const data = dataset[index];
-                    const newDML = {...localDML, data: [data]};
-                    if(beffore){
-                        const interceptor = await this.trigger.execute('before'+type, data);
-                        const response =  await this.engine.run('query_engine',[
+                    const newDML = { ...localDML, data: [data] };
+                    if (beffore) {
+                        const interceptor = await this.trigger.execute('before' + type, data);
+                        const response = await this.engine.run('query_engine', [
                             '--action', 'execute',
                             '--dml', JSON.stringify(newDML)
                         ]);
-                        
-                        if(response.status!=200){
+
+                        if (response.status != 200) {
                             interceptor.discard();
                             returnFormattedError(response.status, response.message);
                         }
                         await interceptor.commit();
                         arrayResult = response.data;
                     }
-                    if(after){
-        
-                        const response =  await this.engine.run('query_engine',[
+                    if (after) {
+
+                        const response = await this.engine.run('query_engine', [
                             '--action', 'execute',
                             '--dml', JSON.stringify(newDML)
                         ]);
-                        
-                        if(response.status!=200){
+
+                        if (response.status != 200) {
                             returnFormattedError(response.status, response.message);
                         }
-                        const interceptor = await this.trigger.execute('after'+type, data);
+                        const interceptor = await this.trigger.execute('after' + type, data);
                         await interceptor.commit();
                     }
                 }
-            }else{
-                const response =  await this.engine.run('query_engine',[
+            } else {
+                const response = await this.engine.run('query_engine', [
                     '--action', 'execute',
                     '--dml', JSON.stringify(localDML)
                 ]);
-                
-                if(response.status!=200){
+
+                if (response.status != 200) {
                     returnFormattedError(response.status, response.message);
                 }
-    
+
                 arrayResult = response.data;
             }
-        }else{
-            const response =  await this.engine.run('query_engine',[
+        } else {
+            const response = await this.engine.run('query_engine', [
                 '--action', 'execute',
                 '--dml', JSON.stringify(localDML)
             ]);
-            
-            if(response.status!=200){
+
+            if (response.status != 200) {
                 returnFormattedError(response.status, response.message);
             }
 
             arrayResult = response.data;
         }
 
-        if(computedFieldsNeeded.length>0){
-            let newDataset:any = ComputedFieldProcessor.computedFields(arrayResult, computedFieldsNeeded);
-            const result = newDataset.map((obj:any) => {
+        if (computedFieldsNeeded.length > 0) {
+            let newDataset: any = ComputedFieldProcessor.computedFields(arrayResult, computedFieldsNeeded);
+            const result = newDataset.map((obj: any) => {
                 const newObj = { ...obj };
                 dependeciesArrray.forEach(key => delete newObj[key]);
                 return newObj;
@@ -835,7 +841,7 @@ export class Table {
 
         return arrayResult;
     }
-    
+
 }
 
 function returnFormattedError(status: number, message: string) {
@@ -852,7 +858,7 @@ function returnFormattedError(status: number, message: string) {
     let help = '';
     const color = status === 600 ? YELLOW : RED;
 
-    
+
     if (message.includes("[help]")) {
         const parts = message.split("[help]");
         output += `\n${RED}${BOLD}${parts[0]}${RESET}`;
@@ -865,13 +871,13 @@ function returnFormattedError(status: number, message: string) {
     const stackLines = err.stack?.split('\n') || [];
 
     // Buscamos la primera línea del stack fuera de node_modules
-    const relevantStackLine = stackLines.find(line => 
+    const relevantStackLine = stackLines.find(line =>
         line.includes('.js:') && !line.includes('node_modules')
     );
 
     if (relevantStackLine) {
-        const match = relevantStackLine.match(/\((.*):(\d+):(\d+)\)/) || 
-                      relevantStackLine.match(/at (.*):(\d+):(\d+)/);
+        const match = relevantStackLine.match(/\((.*):(\d+):(\d+)\)/) ||
+            relevantStackLine.match(/at (.*):(\d+):(\d+)/);
 
         if (match) {
             const [, filePath, lineStr, columnStr] = match;
@@ -897,10 +903,9 @@ function returnFormattedError(status: number, message: string) {
                 output += `\n${CYAN}${BOLD}Stack Trace:${RESET}\n${stackLines.slice(2).join('\n')}\n`;
             }
         }
-    }    
+    }
     output += help;
     console.error(output);
-    process.exit(1);
 }
 
 export default Database;

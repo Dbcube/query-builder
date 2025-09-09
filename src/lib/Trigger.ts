@@ -1,5 +1,6 @@
 import path from "path";
 import { FileLogger } from "@dbcube/core";
+import { createRequire } from 'module';
 
 export class Trigger{
     private triggers: any[];
@@ -33,8 +34,13 @@ export class Trigger{
                 useBuffer: true
             });
             const pathFile = path.resolve(process.cwd(), 'dbcube', 'triggers', `${trigger.database_ref}_${trigger.table_ref}_${trigger.type}.js`);
+            // Use __filename for CJS, process.cwd() for ESM
+            const requireUrl = typeof __filename !== 'undefined' ? __filename : process.cwd();
+            const require = createRequire(requireUrl);
+            // Clear require cache to ensure fresh load
             delete require.cache[require.resolve(pathFile)];
-            const dataProcess = require(pathFile);
+            const triggerModule = require(pathFile);
+            const dataProcess = triggerModule.default || triggerModule;
             await dataProcess({db: this.instance, oldData: row, newData: row});
             interceptor.restore(); 
             return interceptor;
