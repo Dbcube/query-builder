@@ -599,6 +599,8 @@ export class Table {
     */
     async get(): Promise<DatabaseRecord[]> {
         try {
+            this.dml.type = 'select';
+            this.dml.data = null;
             const result = await this.getResponse();
             return result;
         }
@@ -617,6 +619,8 @@ export class Table {
      * console.log(user); // { id: 1, name: 'John' }
      */
     async first(): Promise<DatabaseRecord | null> {
+        this.dml.type = 'select';
+        this.dml.data = null;
         this.dml.limit = 1;
         try {
             const result = await this.getResponse();
@@ -639,6 +643,8 @@ export class Table {
      * console.log(user); // { id: 1, name: 'John' }
      */
     async find(value: any, column: string = 'id'): Promise<DatabaseRecord | null> {
+        this.dml.type = 'select';
+        this.dml.data = null;
         this.where(column, '=', value);
         this.dml.limit = 1;
         try {
