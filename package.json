@@ -61,8 +61,8 @@
     "url": "https://github.com/Dbcube/query-builder"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
-    "rollup": "^4.52.0",
+    "@types/node": "^24.4.0",
+    "rollup": "^4.50.1",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   }
