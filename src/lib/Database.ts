@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { Engine, ComputedFieldProcessor, TriggerProcessor } from "@dbcube/core";
+import { QueryEngine, ComputedFieldProcessor, TriggerProcessor } from "@dbcube/core";
 import { DatabaseRecord, DML, WhereCallback, WhereCondition } from "../@types/Database";
 import { Trigger } from './Trigger';
 
@@ -15,7 +15,7 @@ export class Database {
 
     constructor(name: string) {
         this.name = name;
-        const engine = new Engine(name);
+        const engine = new QueryEngine(name);
         this.engine = engine;
         this.computedFields = [];
         this.triggers = [];
@@ -649,7 +649,7 @@ export class Table {
         this.dml.limit = 1;
         try {
             const result = await this.getResponse();
-            return Array.isArray(result) ? result[0] || null : null;
+            return result[0] || null;
         }
         catch (error) {
             throw error;
@@ -746,7 +746,6 @@ export class Table {
         }
 
         const deleteData = await this.getResponse(newDml, 'Delete');
-        await this.getResponse();
         return deleteData;
     }
 
@@ -844,7 +843,20 @@ export class Table {
             });
             return result;
         }
-
+        this.dml = {
+            ...this.dml,
+            type: 'select',
+            columns: ['*'],
+            distinct: false,
+            joins: [],
+            where: [],
+            orderBy: [],
+            groupBy: [],
+            limit: null,
+            offset: null,
+            data: null,
+            aggregation: null
+        };
         return arrayResult;
     }
 
