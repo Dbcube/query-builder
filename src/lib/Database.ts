@@ -21,12 +21,18 @@ export class Database {
         this.triggers = [];
     }
 
-    async useComputes(): Promise<void> {
-        this.computedFields = await ComputedFieldProcessor.getComputedFields(this.name);
+    async useComputes(): Promise<Database> {
+        const newDatabase = new Database(this.name); 
+        const arrayComputedFields = await ComputedFieldProcessor.getComputedFields(this.name);
+        newDatabase.setComputedFields(arrayComputedFields);
+        return newDatabase;
     }
 
-    async useTriggers(): Promise<void> {
-        this.triggers = await TriggerProcessor.getTriggers(this.name);
+    async useTriggers(): Promise<Database> {
+        const newDatabase = new Database(this.name); 
+        const arrayTriggers = await TriggerProcessor.getTriggers(this.name);
+        newDatabase.setTriggers(arrayTriggers);
+        return newDatabase;
     }
 
     async connect(): Promise<void> {
@@ -84,6 +90,14 @@ export class Database {
      */
     table(tableName: string): Table {
         return new Table(this, this.name, tableName, this.engine, this.computedFields, this.triggers);
+    }
+
+    private setComputedFields(computedFields: any[]){
+        this.computedFields = computedFields;
+    }
+
+    private setTriggers(triggers: any[]){
+        this.triggers = triggers;
     }
 }
 
@@ -731,21 +745,7 @@ export class Table {
 
         this.dml.type = 'delete';
 
-        const newDml = {
-            ...this.dml,
-            type: 'select',
-            columns: ['*'],
-            distinct: false,
-            joins: [],
-            orderBy: [],
-            groupBy: [],
-            limit: null,
-            offset: null,
-            data: null,
-            aggregation: null
-        }
-
-        const deleteData = await this.getResponse(newDml, 'Delete');
+        const deleteData = await this.getResponse(this.dml, 'Delete');
         return deleteData;
     }
 
