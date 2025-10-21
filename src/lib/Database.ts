@@ -148,9 +148,10 @@ export class Table {
      * console.log(users); // [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }]
      */
     select(fields: string[] = []): Table {
-        this.dml.type = 'select';
-        this.dml.columns = fields.length > 0 ? fields : ['*'];
-        return this;
+        const clone = this.clone();
+        clone.dml.type = 'select';
+        clone.dml.columns = fields.length > 0 ? fields : ['*'];
+        return clone;
     }
 
     /**
@@ -169,15 +170,16 @@ export class Table {
     where(column: string, operator: 'IS NULL' | 'IS NOT NULL'): Table;
     where(column: string, operator: '=' | '!=' | '<>' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'NOT LIKE' | 'IN' | 'NOT IN' | 'BETWEEN' | 'NOT BETWEEN', value: any): Table;
     where(column: string, operator: string, value?: any): Table {
-        this.dml.where.push({
+        const clone = this.clone();
+        clone.dml.where.push({
             column,
             operator,
             value,
-            type: this.nextType,
+            type: clone.nextType,
             isGroup: false
         });
-        this.nextType = 'AND';
-        return this;
+        clone.nextType = 'AND';
+        return clone;
     }
 
     /**
@@ -196,14 +198,15 @@ export class Table {
     orWhere(column: string, operator: 'IS NULL' | 'IS NOT NULL'): Table;
     orWhere(column: string, operator: '=' | '!=' | '<>' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'NOT LIKE' | 'IN' | 'NOT IN' | 'BETWEEN' | 'NOT BETWEEN', value: any): Table;
     orWhere(column: string, operator: string, value?: any): Table {
-        this.dml.where.push({
+        const clone = this.clone();
+        clone.dml.where.push({
             column,
             operator,
             value,
             type: 'OR',
             isGroup: false
         });
-        return this;
+        return clone;
     }
 
     /**
@@ -219,26 +222,29 @@ export class Table {
      * console.log(users); // [{ id: 1, name: 'John', age: 30 }, { id: 2, name: 'Jane', age: 25 }]
      */
     whereGroup(callback: WhereCallback): Table {
-        const groupQuery = new Table(this.dml.database, this.dml.table, this.engine);
+        const clone = this.clone();
+        const groupQuery = new Table(this, clone.dml.database, clone.dml.table, clone.engine);
         callback(groupQuery);
 
-        this.dml.where.push({
-            type: this.nextType,
+        clone.dml.where.push({
+            type: clone.nextType,
             isGroup: true,
             conditions: groupQuery.dml.where as WhereCondition[]
         });
-        this.nextType = 'AND';
-        return this;
+        clone.nextType = 'AND';
+        return clone;
     }
 
     or(): Table {
-        this.nextType = 'OR';
-        return this;
+        const clone = this.clone();
+        clone.nextType = 'OR';
+        return clone;
     }
 
     and(): Table {
-        this.nextType = 'AND';
-        return this;
+        const clone = this.clone();
+        clone.nextType = 'AND';
+        return clone;
     }
 
     /**
@@ -253,18 +259,19 @@ export class Table {
      * console.log(users); // [{ id: 1, name: 'John', age: 30 }, { id: 2, name: 'Jane', age: 25 }]
      */
     whereBetween(column: string, values: [any, any]): Table {
+        const clone = this.clone();
         const [value1, value2] = values;
         if (value1 !== undefined && value2 !== undefined) {
-            this.dml.where.push({
+            clone.dml.where.push({
                 column,
                 operator: 'BETWEEN',
                 value: [value1, value2],
-                type: this.nextType,
+                type: clone.nextType,
                 isGroup: false
             });
-            this.nextType = 'AND';
+            clone.nextType = 'AND';
         }
-        return this;
+        return clone;
     }
 
     /**
@@ -279,17 +286,18 @@ export class Table {
      * console.log(users); // [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }]
      */
     whereIn(column: string, values: any[]): Table {
+        const clone = this.clone();
         if (Array.isArray(values) && values.length > 0) {
-            this.dml.where.push({
+            clone.dml.where.push({
                 column,
                 operator: 'IN',
                 value: values,
-                type: this.nextType,
+                type: clone.nextType,
                 isGroup: false
             });
-            this.nextType = 'AND';
+            clone.nextType = 'AND';
         }
-        return this;
+        return clone;
     }
 
     /**
@@ -303,14 +311,15 @@ export class Table {
     * console.log(users); // [{ id: 3, name: 'Alice', email: null }]
     */
     whereNull(column: string): Table {
-        this.dml.where.push({
+        const clone = this.clone();
+        clone.dml.where.push({
             column,
             operator: 'IS NULL',
-            type: this.nextType,
+            type: clone.nextType,
             isGroup: false
         });
-        this.nextType = 'AND';
-        return this;
+        clone.nextType = 'AND';
+        return clone;
     }
 
     /**
@@ -324,14 +333,15 @@ export class Table {
      * console.log(users); // [{ id: 1, name: 'John', email: 'john@example.com' }]
      */
     whereNotNull(column: string): Table {
-        this.dml.where.push({
+        const clone = this.clone();
+        clone.dml.where.push({
             column,
             operator: 'IS NOT NULL',
-            type: this.nextType,
+            type: clone.nextType,
             isGroup: false
         });
-        this.nextType = 'AND';
-        return this;
+        clone.nextType = 'AND';
+        return clone;
     }
 
     /**
@@ -348,7 +358,8 @@ export class Table {
      * console.log(users); // [{ id: 1, name: 'John', order_id: 101 }]
      */
     join(table: string, column1: string, operator: string, column2: string): Table {
-        this.dml.joins.push({
+        const clone = this.clone();
+        clone.dml.joins.push({
             type: 'INNER',
             table,
             on: {
@@ -357,7 +368,7 @@ export class Table {
                 column2
             }
         });
-        return this;
+        return clone;
     }
 
     /**
@@ -374,7 +385,8 @@ export class Table {
      * console.log(users); // [{ id: 1, name: 'John', order_id: 101 }, { id: 2, name: 'Jane', order_id: null }]
      */
     leftJoin(table: string, column1: string, operator: string, column2: string): Table {
-        this.dml.joins.push({
+        const clone = this.clone();
+        clone.dml.joins.push({
             type: 'LEFT',
             table,
             on: {
@@ -383,7 +395,7 @@ export class Table {
                 column2
             }
         });
-        return this;
+        return clone;
     }
 
     /**
@@ -400,7 +412,8 @@ export class Table {
      * console.log(users); // [{ id: 1, name: 'John', order_id: 101 }, { id: null, name: null, order_id: 102 }]
      */
     rightJoin(table: string, column1: string, operator: string, column2: string): Table {
-        this.dml.joins.push({
+        const clone = this.clone();
+        clone.dml.joins.push({
             type: 'RIGHT',
             table,
             on: {
@@ -409,7 +422,7 @@ export class Table {
                 column2
             }
         });
-        return this;
+        return clone;
     }
 
     /**
@@ -424,16 +437,17 @@ export class Table {
      * console.log(users); // [{ id: 2, name: 'Jane' }, { id: 1, name: 'John' }]
      */
     orderBy(column: string, direction: 'ASC' | 'DESC' = 'ASC'): Table {
+        const clone = this.clone();
         const validDirections: ('ASC' | 'DESC')[] = ['ASC', 'DESC'];
         if (validDirections.includes(direction.toUpperCase() as 'ASC' | 'DESC')) {
-            this.dml.orderBy.push({
+            clone.dml.orderBy.push({
                 column,
                 direction: direction.toUpperCase() as 'ASC' | 'DESC'
             });
         } else {
             throw new Error(`Invalid direction: ${direction}. Use 'ASC' or 'DESC'.`);
         }
-        return this;
+        return clone;
     }
 
     /**
@@ -447,8 +461,9 @@ export class Table {
      * console.log(users); // [{ age: 30, count: 1 }, { age: 25, count: 1 }]
      */
     groupBy(column: string): Table {
-        this.dml.groupBy.push(column);
-        return this;
+        const clone = this.clone();
+        clone.dml.groupBy.push(column);
+        return clone;
     }
 
     /**
@@ -461,8 +476,9 @@ export class Table {
      * console.log(users); // [{ name: 'John' }, { name: 'Jane' }]
      */
     distinct(): Table {
-        this.dml.distinct = true;
-        return this;
+        const clone = this.clone();
+        clone.dml.distinct = true;
+        return clone;
     }
 
     /**
@@ -475,15 +491,28 @@ export class Table {
      * const count = await db.table('users').count().first();
      * console.log(count); // { count: 2 }
      */
-    count(column: string = '*'): Table {
-        this.dml.type = 'select';
-        this.dml.aggregation = {
+    async count(column: string = '*'): Promise<Number> {
+        const clone = this.clone();
+        clone.dml.type = 'select';
+        clone.dml.aggregation = {
             type: 'COUNT',
             column,
             alias: 'count'
-        };
-        this.dml.columns = [`COUNT(${column}) AS count`];
-        return this;
+        }
+        clone.dml.columns = [`COUNT(${column}) AS count`];
+        clone.dml.data = null;
+        clone.dml.limit = 1;
+        try {
+            const result = await clone.getResponse();
+            const res = result[0] || null;
+            if (res) {
+                return res.count;
+            }
+            return 0;
+        }
+        catch (error) {
+            throw error;
+        }
     }
 
     /**
@@ -496,15 +525,28 @@ export class Table {
      * const totalAge = await db.table('users').sum('age').first();
      * console.log(totalAge); // { sum: 55 }
      */
-    sum(column: string): Table {
-        this.dml.type = 'select';
-        this.dml.aggregation = {
+    async sum(column: string): Promise<Number> {
+        const clone = this.clone();
+        clone.dml.type = 'select';
+        clone.dml.aggregation = {
             type: 'SUM',
             column,
             alias: 'sum'
-        };
-        this.dml.columns = [`SUM(${column}) AS sum`];
-        return this;
+        }
+        clone.dml.columns = [`SUM(${column}) AS sum`];
+        clone.dml.data = null;
+        clone.dml.limit = 1;
+        try {
+            const result = await clone.getResponse();
+            const res = result[0] || null;
+            if (res) {
+                return res.sum;
+            }
+            return 0;
+        }
+        catch (error) {
+            throw error;
+        }
     }
 
     /**
@@ -517,15 +559,28 @@ export class Table {
      * const avgAge = await db.table('users').avg('age').first();
      * console.log(avgAge); // { avg: 27.5 }
      */
-    avg(column: string): Table {
-        this.dml.type = 'select';
-        this.dml.aggregation = {
+    async avg(column: string): Promise<Number> {
+        const clone = this.clone();
+        clone.dml.type = 'select';
+        clone.dml.aggregation = {
             type: 'AVG',
             column,
             alias: 'avg'
-        };
-        this.dml.columns = [`AVG(${column}) AS avg`];
-        return this;
+        }
+        clone.dml.columns = [`AVG(${column}) AS avg`];
+        clone.dml.data = null;
+        clone.dml.limit = 1;
+        try {
+            const result = await clone.getResponse();
+            const res = result[0] || null;
+            if (res) {
+                return res.avg;
+            }
+            return 0;
+        }
+        catch (error) {
+            throw error;
+        }
     }
 
     /**
@@ -538,15 +593,28 @@ export class Table {
      * const maxAge = await db.table('users').max('age').first();
      * console.log(maxAge); // { max: 30 }
      */
-    max(column: string): Table {
-        this.dml.type = 'select';
-        this.dml.aggregation = {
+    async max(column: string): Promise<Number> {
+        const clone = this.clone();
+        clone.dml.type = 'select';
+        clone.dml.aggregation = {
             type: 'MAX',
             column,
             alias: 'max'
-        };
-        this.dml.columns = [`MAX(${column}) AS max`];
-        return this;
+        }
+        clone.dml.columns = [`MAX(${column}) AS max`];
+        clone.dml.data = null;
+        clone.dml.limit = 1;
+        try {
+            const result = await clone.getResponse();
+            const res = result[0] || null;
+            if (res) {
+                return res.max;
+            }
+            return 0;
+        }
+        catch (error) {
+            throw error;
+        }
     }
 
     /**
@@ -559,15 +627,28 @@ export class Table {
      * const minAge = await db.table('users').min('age').first();
      * console.log(minAge); // { min: 25 }
      */
-    min(column: string): Table {
-        this.dml.type = 'select';
-        this.dml.aggregation = {
+    async min(column: string): Promise<Number> {
+        const clone = this.clone();
+        clone.dml.type = 'select';
+        clone.dml.aggregation = {
             type: 'MIN',
             column,
             alias: 'min'
-        };
-        this.dml.columns = [`MIN(${column}) AS min`];
-        return this;
+        }
+        clone.dml.columns = [`MIN(${column}) AS min`];
+        clone.dml.data = null;
+        clone.dml.limit = 1;
+        try {
+            const result = await clone.getResponse();
+            const res = result[0] || null;
+            if (res) {
+                return res.min;
+            }
+            return 0;
+        }
+        catch (error) {
+            throw error;
+        }
     }
 
     /**
@@ -581,8 +662,9 @@ export class Table {
      * console.log(users); // [{ id: 1, name: 'John', age: 30 }]
      */
     limit(number: number): Table {
-        this.dml.limit = number;
-        return this;
+        const clone = this.clone();
+        clone.dml.limit = number;
+        return clone;
     }
 
     /**
@@ -596,10 +678,11 @@ export class Table {
      * console.log(users); // [{ id: 2, name: 'Jane', age: 25 }]
      */
     page(number: number): Table {
-        if (this.dml.limit) {
-            this.dml.offset = (number - 1) * this.dml.limit;
+        const clone = this.clone();
+        if (clone.dml.limit) {
+            clone.dml.offset = (number - 1) * clone.dml.limit;
         }
-        return this;
+        return clone;
     }
 
     /**
@@ -613,9 +696,10 @@ export class Table {
     */
     async get(): Promise<DatabaseRecord[]> {
         try {
-            this.dml.type = 'select';
-            this.dml.data = null;
-            const result = await this.getResponse();
+            const clone = this.clone();
+            clone.dml.type = 'select';
+            clone.dml.data = null;
+            const result = await clone.getResponse();
             return result;
         }
         catch (error) {
@@ -633,11 +717,12 @@ export class Table {
      * console.log(user); // { id: 1, name: 'John' }
      */
     async first(): Promise<DatabaseRecord | null> {
-        this.dml.type = 'select';
-        this.dml.data = null;
-        this.dml.limit = 1;
+        const clone = this.clone();
+        clone.dml.type = 'select';
+        clone.dml.data = null;
+        clone.dml.limit = 1;
         try {
-            const result = await this.getResponse();
+            const result = await clone.getResponse();
             return result[0] || null;
         }
         catch (error) {
@@ -657,12 +742,13 @@ export class Table {
      * console.log(user); // { id: 1, name: 'John' }
      */
     async find(value: any, column: string = 'id'): Promise<DatabaseRecord | null> {
-        this.dml.type = 'select';
-        this.dml.data = null;
-        this.where(column, '=', value);
-        this.dml.limit = 1;
+        const clone = this.clone();
+        clone.dml.type = 'select';
+        clone.dml.data = null;
+        clone.where(column, '=', value);
+        clone.dml.limit = 1;
         try {
-            const result = await this.getResponse();
+            const result = await clone.getResponse();
             return result[0] || null;
         }
         catch (error) {
@@ -684,6 +770,7 @@ export class Table {
      * console.log(newUsers); // [{ id: 3, name: 'Alice', age: 28 }, { id: 4, name: 'Bob', age: 32 }]
      */
     async insert(data: DatabaseRecord[]): Promise<DatabaseRecord[]> {
+        const clone = this.clone();
         if (!Array.isArray(data)) {
             throw new Error('The insert method requires an array of objects with key-value pairs.');
         }
@@ -692,10 +779,10 @@ export class Table {
             throw new Error('The array must contain only valid objects.');
         }
 
-        this.dml.type = 'insert';
-        this.dml.data = data;
+        clone.dml.type = 'insert';
+        clone.dml.data = data;
 
-        await this.getResponse(this.dml, 'Add');
+        await clone.getResponse(clone.dml, 'Add');
 
         return data;
     }
@@ -713,18 +800,19 @@ export class Table {
      * console.log(result); // { affectedRows: 1 }
      */
     async update(data: DatabaseRecord): Promise<any> {
+        const clone = this.clone();
         if (typeof data !== 'object' || Array.isArray(data)) {
             throw new Error('The update method requires an object with key-value pairs.');
         }
 
-        if (this.dml.where.length === 0) {
+        if (clone.dml.where.length === 0) {
             throw new Error('You must specify at least one WHERE condition to perform an update.');
         }
 
-        this.dml.type = 'update';
-        this.dml.data = data;
+        clone.dml.type = 'update';
+        clone.dml.data = data;
 
-        await this.getResponse(this.dml, 'Update');
+        await clone.getResponse(clone.dml, 'Update');
 
         return data;
     }
@@ -739,13 +827,14 @@ export class Table {
      * console.log(result); // { affectedRows: 1 }
      */
     async delete(): Promise<any> {
-        if (this.dml.where.length === 0) {
+        const clone = this.clone();
+        if (clone.dml.where.length === 0) {
             throw new Error('You must specify at least one WHERE condition to perform a delete.');
         }
 
-        this.dml.type = 'delete';
+        clone.dml.type = 'delete';
 
-        const deleteData = await this.getResponse(this.dml, 'Delete');
+        const deleteData = await clone.getResponse(clone.dml, 'Delete');
         return deleteData;
     }
 
@@ -843,21 +932,25 @@ export class Table {
             });
             return result;
         }
-        this.dml = {
-            ...this.dml,
-            type: 'select',
-            columns: ['*'],
-            distinct: false,
-            joins: [],
-            where: [],
-            orderBy: [],
-            groupBy: [],
-            limit: null,
-            offset: null,
-            data: null,
-            aggregation: null
-        };
         return arrayResult;
+    }
+
+    private clone(): Table {
+        const cloned = Object.create(Object.getPrototypeOf(this));
+        cloned.engine = this.engine;
+        cloned.nextType = this.nextType;
+        cloned.computedFields = this.computedFields;
+        cloned.trigger = this.trigger;
+        cloned.triggers = this.triggers;
+        cloned.dml = {
+            ...this.dml,
+            columns: [...this.dml.columns],
+            joins: [...this.dml.joins],
+            where: [...this.dml.where],
+            orderBy: [...this.dml.orderBy],
+            groupBy: [...this.dml.groupBy]
+        };
+        return cloned;
     }
 
 }
