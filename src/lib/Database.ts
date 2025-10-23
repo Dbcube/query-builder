@@ -151,6 +151,7 @@ export class Table {
         const clone = this.clone();
         clone.dml.type = 'select';
         clone.dml.columns = fields.length > 0 ? fields : ['*'];
+        clone.dml.aggregation = null;
         return clone;
     }
 
@@ -699,6 +700,7 @@ export class Table {
             const clone = this.clone();
             clone.dml.type = 'select';
             clone.dml.data = null;
+            clone.dml.aggregation = null;
             const result = await clone.getResponse();
             return result;
         }
@@ -720,6 +722,7 @@ export class Table {
         const clone = this.clone();
         clone.dml.type = 'select';
         clone.dml.data = null;
+        clone.dml.aggregation = null;
         clone.dml.limit = 1;
         try {
             const result = await clone.getResponse();
@@ -745,6 +748,7 @@ export class Table {
         const clone = this.clone();
         clone.dml.type = 'select';
         clone.dml.data = null;
+        clone.dml.aggregation = null;
         clone.where(column, '=', value);
         clone.dml.limit = 1;
         try {
