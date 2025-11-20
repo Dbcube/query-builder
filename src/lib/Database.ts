@@ -502,7 +502,8 @@ export class Table {
         }
         clone.dml.columns = [`COUNT(${column}) AS count`];
         clone.dml.data = null;
-        clone.dml.limit = 1;
+        clone.dml.limit = null;  // Remover limit para contar todos
+        clone.dml.offset = null;  // Remover offset también
         try {
             const result = await clone.getResponse();
             const res = result[0] || null;
@@ -664,7 +665,7 @@ export class Table {
      */
     limit(number: number): Table {
         const clone = this.clone();
-        clone.dml.limit = number;
+        clone.dml.limit = Number(number);
         return clone;
     }
 
@@ -680,8 +681,9 @@ export class Table {
      */
     page(number: number): Table {
         const clone = this.clone();
+        const pageNum = Number(number);
         if (clone.dml.limit) {
-            clone.dml.offset = (number - 1) * clone.dml.limit;
+            clone.dml.offset = (pageNum - 1) * clone.dml.limit;
         }
         return clone;
     }
@@ -946,13 +948,17 @@ export class Table {
         cloned.computedFields = this.computedFields;
         cloned.trigger = this.trigger;
         cloned.triggers = this.triggers;
+
         cloned.dml = {
             ...this.dml,
             columns: [...this.dml.columns],
             joins: [...this.dml.joins],
             where: [...this.dml.where],
             orderBy: [...this.dml.orderBy],
-            groupBy: [...this.dml.groupBy]
+            groupBy: [...this.dml.groupBy],
+            // Clonar propiedades que faltaban para evitar mutación compartida
+            data: this.dml.data ? (Array.isArray(this.dml.data) ? [...this.dml.data] : { ...this.dml.data }) : null,
+            aggregation: this.dml.aggregation ? { ...this.dml.aggregation } : null
         };
         return cloned;
     }

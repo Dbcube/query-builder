@@ -62,7 +62,7 @@
 
 Its agnostic design allows you to generate data manipulation (DML) and data definition (DDL) operations with a clean, chainable syntax—without sacrificing power or expressiveness. It's designed to work seamlessly in both SQL and NoSQL environments, providing a consistent abstraction layer across different storage technologies while still leveraging the native capabilities of each engine.
 
-**Key differentiator**: Unlike other query builders that focus on a single database type, DBCube Query Builder provides a unified API that works across SQL and NoSQL databases, making it perfect for modern polyglot architectures.
+**Key differentiator**: Unlike other query builders that focus on a single database type, Dbcube Query Builder provides a unified API that works across SQL and NoSQL databases, making it perfect for modern polyglot architectures.
 
 ## Features
 
@@ -89,10 +89,10 @@ npm install @dbcube/query-builder
 
 ## Configuration
 
-DBCube Query Builder works with the DBCube ecosystem. Make sure you have the proper database configuration through @dbcube/core.
+Dbcube Query Builder works with the Dbcube ecosystem. Make sure you have the proper database configuration through @dbcube/core.
 
 ```typescript
-// No explicit configuration needed - works through DBCube core
+// No explicit configuration needed - works through Dbcube core
 import { Database } from "@dbcube/query-builder";
 ```
 
@@ -100,7 +100,7 @@ import { Database } from "@dbcube/query-builder";
 
 ### Database Connection
 
-The connection is automatically managed through the DBCube core system.
+The connection is automatically managed through the Dbcube core system.
 
 ```typescript
 import { Database } from "@dbcube/query-builder";
@@ -114,7 +114,7 @@ const usersTable = db.table("users");
 
 ## Table Operations
 
-DBCube Query Builder focuses on data operations. Table creation and schema management are handled by other DBCube components.
+Dbcube Query Builder focuses on data operations. Table creation and schema management are handled by other Dbcube components.
 
 ```typescript
 // Access table for operations
@@ -616,7 +616,7 @@ console.log(firstUser);
 
 ## Computed Fields and Triggers
 
-DBCube Query Builder supports computed fields and triggers for advanced data processing.
+Dbcube Query Builder supports computed fields and triggers for advanced data processing.
 
 ```typescript
 // Enable computed fields (processed automatically)
@@ -625,7 +625,7 @@ await db.useComputes();
 // Enable triggers
 await db.useTriggers();
 
-// Triggers and computed fields are configured through other DBCube components
+// Triggers and computed fields are configured through other Dbcube components
 ```
 
 ## Executing Raw SQL Queries
@@ -634,7 +634,7 @@ For complex queries that require raw SQL, use the underlying engine.
 
 ```typescript
 // Access the underlying engine for raw queries
-// (Implementation depends on your specific DBCube core setup)
+// (Implementation depends on your specific Dbcube core setup)
 
 // Note: Raw SQL queries bypass the query builder's abstraction layer
 // and are database-specific
@@ -842,7 +842,7 @@ Delete rows matching the conditions.
 
 ## Multi-Database Support
 
-DBCube Query Builder works with multiple database engines:
+Dbcube Query Builder works with multiple database engines:
 
 ```typescript
 // MySQL
@@ -970,7 +970,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Su diseño agnóstico te permite generar operaciones de manipulación de datos (DML) y definición de datos (DDL) con una sintaxis limpia y encadenable, sin sacrificar potencia o expresividad. Está diseñada para trabajar perfectamente en entornos SQL y NoSQL, proporcionando una capa de abstracción consistente a través de diferentes tecnologías de almacenamiento mientras aprovecha las capacidades nativas de cada motor.
 
-**Diferenciador clave**: A diferencia de otros constructores de consultas que se enfocan en un solo tipo de base de datos, DBCube Query Builder proporciona una API unificada que funciona a través de bases de datos SQL y NoSQL, haciéndola perfecta para arquitecturas políglotas modernas.
+**Diferenciador clave**: A diferencia de otros constructores de consultas que se enfocan en un solo tipo de base de datos, Dbcube Query Builder proporciona una API unificada que funciona a través de bases de datos SQL y NoSQL, haciéndola perfecta para arquitecturas políglotas modernas.
 
 ## Características
 
@@ -997,10 +997,10 @@ npm install @dbcube/query-builder
 
 ## Configuración
 
-DBCube Query Builder funciona con el ecosistema DBCube. Asegúrate de tener la configuración adecuada de base de datos a través de @dbcube/core.
+Dbcube Query Builder funciona con el ecosistema Dbcube. Asegúrate de tener la configuración adecuada de base de datos a través de @dbcube/core.
 
 ```typescript
-// No se necesita configuración explícita - funciona a través de DBCube core
+// No se necesita configuración explícita - funciona a través de Dbcube core
 import { Database } from "@dbcube/query-builder";
 ```
 
@@ -1008,7 +1008,7 @@ import { Database } from "@dbcube/query-builder";
 
 ### Conexión a la base de datos
 
-La conexión se gestiona automáticamente a través del sistema core de DBCube.
+La conexión se gestiona automáticamente a través del sistema core de Dbcube.
 
 ```typescript
 import { Database } from "@dbcube/query-builder";
@@ -1022,7 +1022,7 @@ const tablaUsuarios = db.table("usuarios");
 
 ## Operaciones de tabla
 
-DBCube Query Builder se enfoca en operaciones de datos. La creación de tablas y gestión de esquemas se maneja por otros componentes de DBCube.
+Dbcube Query Builder se enfoca en operaciones de datos. La creación de tablas y gestión de esquemas se maneja por otros componentes de Dbcube.
 
 ```typescript
 // Acceder a tabla para operaciones
@@ -1524,7 +1524,7 @@ console.log(primerUsuario);
 
 ## Campos calculados y triggers
 
-DBCube Query Builder soporta campos calculados y triggers para procesamiento avanzado de datos.
+Dbcube Query Builder soporta campos calculados y triggers para procesamiento avanzado de datos.
 
 ```typescript
 // Habilitar campos calculados (procesados automáticamente)
@@ -1533,7 +1533,7 @@ await db.useComputes();
 // Habilitar triggers
 await db.useTriggers();
 
-// Los triggers y campos calculados se configuran a través de otros componentes DBCube
+// Los triggers y campos calculados se configuran a través de otros componentes Dbcube
 ```
 
 ## Ejecutar consultas SQL crudas
@@ -1542,7 +1542,7 @@ Para consultas complejas que requieren SQL crudo, utiliza el motor subyacente.
 
 ```typescript
 // Acceder al motor subyacente para consultas crudas
-// (La implementación depende de tu configuración específica de DBCube core)
+// (La implementación depende de tu configuración específica de Dbcube core)
 
 // Nota: Las consultas SQL crudas evitan la capa de abstracción del query builder
 // y son específicas de la base de datos
@@ -1628,7 +1628,7 @@ Los métodos de la clase Table siguen la misma API que se documentó en la secci
 
 ## Soporte multi-base de datos
 
-DBCube Query Builder funciona con múltiples motores de base de datos:
+Dbcube Query Builder funciona con múltiples motores de base de datos:
 
 ```typescript
 // MySQL
