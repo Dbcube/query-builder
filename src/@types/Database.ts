@@ -39,12 +39,12 @@ export interface Aggregation {
 }
 
 export interface DML {
-    type: 'select' | 'insert' | 'update' | 'delete';
+    type: 'select' | 'insert' | 'update' | 'delete' | 'columns';
     database: string;
     table: string;
     columns: string[];
     requestedFields?: string[];
-    computedFieldsNeeded?: any[];  
+    computedFieldsNeeded?: any[];
     distinct: boolean;
     joins: Join[];
     where: (WhereCondition | GroupedWhereCondition)[];

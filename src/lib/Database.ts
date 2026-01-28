@@ -654,6 +654,65 @@ export class Table {
     }
 
     /**
+     * Gets the column names of the table.
+     * For SQL databases (MySQL, PostgreSQL, SQLite), returns a simple array of column names.
+     * For MongoDB, returns a hierarchical structure with nested documents.
+     *
+     * @returns {Promise<string[] | any>} - Returns an array of column names for SQL databases,
+     *                                      or a hierarchical structure for MongoDB.
+     *
+     * @example
+     * // SQL databases (MySQL, PostgreSQL, SQLite)
+     * const columns = await db.table('users').columns();
+     * console.log(columns); // ['id', 'name', 'email', 'age', 'created_at']
+     *
+     * @example
+     * // MongoDB
+     * const structure = await db.table('users').columns();
+     * console.log(structure);
+     * // {
+     * //   columns: ['id', 'name', 'profile'],
+     * //   submenu: {
+     * //     profile: {
+     * //       columns: ['age', 'city'],
+     * //       submenu: {}
+     * //     }
+     * //   }
+     * // }
+     */
+    async columns(): Promise<string[] | any> {
+        const clone = this.clone();
+        clone.dml.type = 'columns';
+        clone.dml.columns = [];
+        clone.dml.where = [];
+        clone.dml.orderBy = [];
+        clone.dml.groupBy = [];
+        clone.dml.limit = null;
+        clone.dml.offset = null;
+        clone.dml.data = null;
+        clone.dml.aggregation = null;
+
+        try {
+            const result = await clone.getResponse();
+
+            if (Array.isArray(result) && result.length > 0) {
+                // Verificar si es MongoDB (estructura jerárquica)
+                if (result[0].columns && result[0].submenu !== undefined) {
+                    // MongoDB: devolver la estructura completa
+                    return result[0];
+                }
+
+                // SQL databases: transformar a array simple de strings
+                return result.map((row: any) => row.column_name || row.Field || row.name);
+            }
+
+            return [];
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
      * Adds a LIMIT clause to the query.
      *
      * @param {number} number - The maximum number of rows to return.
