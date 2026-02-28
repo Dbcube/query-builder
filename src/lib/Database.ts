@@ -834,7 +834,7 @@ export class Table {
      * ]);
      * console.log(newUsers); // [{ id: 3, name: 'Alice', age: 28 }, { id: 4, name: 'Bob', age: 32 }]
      */
-    async insert(data: DatabaseRecord[]): Promise<DatabaseRecord | DatabaseRecord[]> {
+    async insert(data: DatabaseRecord[]): Promise<DatabaseRecord[]> {
         const clone = this.clone();
         if (!Array.isArray(data)) {
             throw new Error('The insert method requires an array of objects with key-value pairs.');
@@ -849,9 +849,6 @@ export class Table {
 
         const result = await clone.getResponse(clone.dml, 'Add');
 
-        if (data.length === 1) {
-            return result[0] ?? data[0];
-        }
         return result ?? data;
     }
 
